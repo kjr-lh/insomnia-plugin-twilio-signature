@@ -1,0 +1,29 @@
+{
+  "name": "insomnia-plugin-twilio-signature",
+  "version": "0.0.1",
+  "description": "Insomnia plugin to sign your request as if they're coming from Twilio.",
+  "main": "plugin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mdlima/insomnia-plugin-twilio-signature.git"
+  },
+  "keywords": [
+    "insomnia",
+    "plugin",
+    "twilio",
+    "signature"
+  ],
+  "author": "Marcio Lima",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mdlima/insomnia-plugin-twilio-signature/issues"
+  },
+  "homepage": "https://github.com/mdlima/insomnia-plugin-twilio-signature#readme",
+  "insomnia": {
+    "name": "twilio-signature",
+    "description": "Add X-Twilio-Signature header to sign your requests as if they're coming from Twilio."
+  }
+}
