@@ -16,7 +16,11 @@ function getExpectedTwilioSignature(authToken, url, params, body) {
     .sort()
     .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(allParams[k])}`)
     .join('&');
-  let data = `${endpoint}?${qsOrderedParams}`;
+  let data = endpoint;
+  if (qsOrderedParams.length) {
+    data = `${data}?${qsOrderedParams}`;
+  }
+  console.log(data);
   if (body) {
     data = Object.keys(JSON.parse(body))
       .sort()
@@ -29,11 +33,15 @@ function getExpectedTwilioSignature(authToken, url, params, body) {
     .digest('base64');
 }
 
-module.exports.requestHooks = [function (context) {
-  const twilioAuthToken = context.request.getEnvironmentVariable('twilio_auth_token');
+module.exports.requestHooks = [async function (context) {
+  if (!context.request.hasHeader('X-Twilio-Signature')) {
+    return;
+  }
+  // const twilioAuthToken = context.request.getEnvironmentVariable('twilio_auth_token');
+  const twilioAuthToken = await context.store.getItem('TwilioAuthToken');
 
   if (!twilioAuthToken) {
-    console.log('No {{twilio_auth_token}} set in this environment.');
+    console.log('TwilioSignature not configured.');
     return;
   }
 
@@ -46,4 +54,29 @@ module.exports.requestHooks = [function (context) {
   );
 
   context.request.setHeader('X-Twilio-Signature', twilioSignature)
+}];
+
+async function run(context, TwilioAuthToken) {
+  if (!TwilioAuthToken) {
+    return 'Missing TwilioAuthToken';
+  }
+  await context.store.setItem('TwilioAuthToken', TwilioAuthToken);
+
+  console.log('TwilioSignature run.');
+
+  return 'X-Twilio-Signature';
+}
+
+module.exports.templateTags = [{
+  name: 'TwilioSignature',
+  displayName: 'TwilioSignature',
+  description: 'Insomnia Plugin to calculate Twilio Signature for your request.',
+  args: [
+    {
+      displayName: 'TwilioAuthToken',
+      type: 'string',
+      validate: arg => (arg ? '' : 'Required')
+    },
+  ],
+  run
 }];
