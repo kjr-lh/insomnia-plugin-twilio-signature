@@ -11,7 +11,6 @@ function getExpectedTwilioSignature(authToken, url, params, body) {
     }, {})
   }
   // Insomnia sorts parameters before sending
-  // TODO: Check if the new request.getBody() method provides params already sorted
   const qsOrderedParams = Object.keys(allParams)
     .sort()
     .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(allParams[k])}`)
@@ -20,11 +19,14 @@ function getExpectedTwilioSignature(authToken, url, params, body) {
   if (qsOrderedParams.length) {
     data = `${data}?${qsOrderedParams}`;
   }
-  console.log(data);
   if (body) {
-    data = Object.keys(JSON.parse(body))
+    const bodyData = body.params.reduce((o, p) => {
+      o[p.name] = p.value;
+      return o;
+    }, {});
+    data = Object.keys(bodyData)
       .sort()
-      .reduce((acc, key) => acc + key + body[key], data);
+      .reduce((acc, key) => acc + key + bodyData[key], data);
   }
 
   return crypto
@@ -49,8 +51,7 @@ module.exports.requestHooks = [async function (context) {
     twilioAuthToken,
     context.request.getUrl(),
     context.request.getParameters(),
-    // TODO: use request.getBody() to ge access to form data when new version is released.
-    context.request.getBodyText(),
+    context.request.getBody(),
   );
 
   context.request.setHeader('X-Twilio-Signature', twilioSignature)
@@ -61,8 +62,6 @@ async function run(context, TwilioAuthToken) {
     return 'Missing TwilioAuthToken';
   }
   await context.store.setItem('TwilioAuthToken', TwilioAuthToken);
-
-  console.log('TwilioSignature run.');
 
   return 'X-Twilio-Signature';
 }
