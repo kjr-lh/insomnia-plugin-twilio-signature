@@ -1,6 +1,6 @@
 {
   "name": "insomnia-plugin-twilio-signature",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Insomnia plugin to sign your request as if they're coming from Twilio.",
   "main": "plugin.js",
   "scripts": {
