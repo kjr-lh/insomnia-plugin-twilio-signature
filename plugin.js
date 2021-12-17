@@ -19,7 +19,7 @@ function getExpectedTwilioSignature(authToken, url, params, body) {
   if (qsOrderedParams.length) {
     data = `${data}?${qsOrderedParams}`;
   }
-  if (body) {
+  if (body && body.params) {
     const bodyData = body.params.reduce((o, p) => {
       o[p.name] = p.value;
       return o;
